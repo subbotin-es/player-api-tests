@@ -23,15 +23,15 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Test with XML report
+      - name: Test with TRX report
         run: |
           dotnet test --no-build --configuration Release --verbosity normal \
-            --logger "junit;LogFilePath=TestResults/results.xml"
+            --logger "trx;LogFileName=results.trx"
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
         if: always()
         with:
           name: NUnit Results
-          path: '**/TestResults/results.xml'
-          reporter: java-junit
+          path: '**/TestResults/results.trx'
+          reporter: dotnet-trx
