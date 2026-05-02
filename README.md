@@ -3,6 +3,8 @@
 REST API + NUnit test suite (unit + integration) for player management.
 Built as a QA Engineering Assessment submission.
 
+[![CI](https://github.com/subbotin-es/player-api-tests/actions/workflows/dotnet.yml/badge.svg)](https://github.com/subbotin-es/player-api-tests/actions/workflows/dotnet.yml)
+
 **Author:** Evgenii Subbotin — evgenii@subbotin.es
 **Portfolio:** subbotin.es | **GitHub:** github.com/subbotin-es | **LinkedIn:** linkedin.com/in/evgenii-subbotin/
 
@@ -46,6 +48,9 @@ All test data is declared in Fixtures/PlayerFixtures.cs — never hardcoded inli
 GitHub Actions runs on every push to main and develop.
 Test results are published as a GitHub Actions job summary (JUnit XML).
 Green badge = all unit + integration tests pass.
+
+**Latest Test Reports:** [View HTML Reports](https://subbotin-es.github.io/player-api-tests/test-report/)  
+*Detailed test results with pass/fail status, execution times, and failure details published via GitHub Pages.*
 
 ## Documentation
 

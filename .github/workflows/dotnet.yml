@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   checks: write
+  pages: write
 
 jobs:
   build-and-test:
@@ -27,16 +28,24 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Test with TRX report
+      - name: Test with XML report
         run: |
-          dotnet test --no-build --configuration Release --verbosity normal \
-            --logger "trx;LogFileName=results.trx"
+          dotnet test --no-build --configuration Release \
+            --logger "junit;LogFilePath=TestResults/results.xml"
 
-      - name: Publish test results
+      - name: Generate HTML report
         uses: dorny/test-reporter@v1
         if: always()
         with:
           name: NUnit Results
-          path: '**/TestResults/results.trx'
-          reporter: dotnet-trx
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: '**/TestResults/results.xml'
+          reporter: java-junit
+          output-to: step-summary
+
+      - name: Publish report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./PlayerApi.Tests/TestResults
+          destination_dir: test-report
