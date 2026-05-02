@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/.git/
+**/.github/
+**/PlayerApi.Tests/bin/
+**/PlayerApi.Tests/obj/
+**/PlayerApi/TestResults/
+**/PlayerApi.Tests/TestResults/
