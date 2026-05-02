@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: read
+  contents: write
   checks: write
   pages: write
 
@@ -28,24 +28,33 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Test with XML report
+      - name: Test with TRX report
         run: |
-          dotnet test --no-build --configuration Release \
-            --logger "junit;LogFilePath=TestResults/results.xml"
+          dotnet test PlayerApi.Tests/PlayerApi.Tests.csproj --no-build --configuration Release \
+            --logger "trx;LogFileName=results.trx"
 
-      - name: Generate HTML report
+      - name: Generate GitHub Actions summary
         uses: dorny/test-reporter@v1
         if: always()
         with:
           name: NUnit Results
-          path: '**/TestResults/results.xml'
-          reporter: java-junit
-          output-to: step-summary
+          path: '**/TestResults/results.trx'
+          reporter: dotnet-trx
+
+      - name: Generate HTML report
+        if: always()
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.1.10
+          reportgenerator -reports:PlayerApi.Tests/TestResults/results.trx \
+            -targetdir: PlayerApi.Tests/TestResults/report \
+            -reporttypes: HtmlInline_AzurePipelines
 
       - name: Publish report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./PlayerApi.Tests/TestResults
+          publish_dir: ./PlayerApi.Tests/TestResults/report
           destination_dir: test-report
+          publish_branch: gh-pages
+          allow_empty_commit: true
