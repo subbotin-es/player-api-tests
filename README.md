@@ -10,8 +10,12 @@ Built as a QA Engineering Assessment submission.
 
 ## Live API
 
-Base URL: https://<your-railway-app>.railway.app
-Swagger UI: https://<your-railway-app>.railway.app/swagger
+| | URL |
+|---|---|
+| Base URL | https://player-api-tests-production.up.railway.app |
+| Swagger UI | https://player-api-tests-production.up.railway.app/swagger |
+
+> **Note:** Hosted on Railway free tier. First request after inactivity may take ~5 seconds to wake.
 
 ## Quick Start (local)
 
@@ -46,11 +50,9 @@ All test data is declared in Fixtures/PlayerFixtures.cs — never hardcoded inli
 ## CI / Test Reports
 
 GitHub Actions runs on every push to main and develop.
-Test results are published as a GitHub Actions job summary (JUnit XML).
 Green badge = all unit + integration tests pass.
 
-**Latest Test Reports:** [View HTML Reports](https://subbotin-es.github.io/player-api-tests/test-report/)  
-*Detailed test results with pass/fail status, execution times, and failure details published via GitHub Pages.*
+Latest CI runs and test results via NUnit — https://github.com/subbotin-es/player-api-tests/actions/workflows/dotnet.yml
 
 ## Documentation
 
