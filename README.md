@@ -54,6 +54,47 @@ Green badge = all unit + integration tests pass.
 
 Latest CI runs and test results via NUnit — https://github.com/subbotin-es/player-api-tests/actions/workflows/dotnet.yml
 
+## Performance Regression Pack
+
+A companion JMeter performance test suite runs against the live Railway API to gate for regressions and document system limits under realistic concurrency.
+
+**Repository:** [player-api-tests-performance](https://github.com/subbotin-es/player-api-tests-performance)
+**Results dashboard (GitHub Pages):** https://subbotin-es.github.io/player-api-tests-performance/
+
+### Approach
+
+Three JMeter 5.6.3 test plans cover the full CRUD lifecycle with JWT authentication:
+
+| Plan | Users | Duration | Purpose |
+|---|---|---|---|
+| Smoke | 5 | 30 s | Regression gate — catches breakage before baseline runs |
+| Baseline | 10 | 60 s | Trend tracking — establishes p95/p99 reference point |
+| Stress | 5 → 15 → 30 (stepped) | ~5 min | Degradation identification under rising concurrency |
+
+JWT tokens are extracted via JMeter's regex engine and injected at thread-group level after login succeeds. All execution is CLI-only; HTML dashboards are generated per run and published to GitHub Pages on every push to `main`. Full dashboards are also retained as CI artifacts for 30 days.
+
+### Key Results
+
+| Stage | Users | Avg latency | p99 | Error rate |
+|---|---|---|---|---|
+| Smoke | 5 | < 200 ms | — | 0% |
+| Baseline | 10 | ~171 ms | — | < 0.5% |
+| Stress (at limit) | ~25 | degraded | ~7.2 s | 3–5% (502/503) |
+
+JWT login accounts for 15–20% of each iteration's wall-clock time across all concurrency levels. Login latency scales roughly linearly with concurrency (CPU-bound signing), while CRUD operations degrade faster due to dictionary write contention.
+
+### Limitations
+
+- **Infrastructure ceiling:** Railway free tier hard-limits containers to 512 MB RAM. At approximately 25 concurrent users, memory saturation triggers container restart cycles and transient gateway errors (502/503). This is an infrastructure constraint, not an application defect.
+- **In-memory store contention:** `ConcurrentDictionary` uses fine-grained striped locking. The p99/p95 ratio climbs from 1.3× at 5 users to 2.6× at 30 users on write-heavy operations (POST create, DELETE). A production database would exhibit different — not necessarily better — contention characteristics.
+- **Cold-start artifact:** A dormant Railway instance adds 4–6 s to the first request. Mitigated by a dedicated warm-up thread group and a CI pre-flight request; warm-up samples are excluded from all reported metrics.
+
+### Assumptions
+
+- Warm-up phase fully isolates cold-start latency; reported averages reflect steady-state behaviour only.
+- JWT signing overhead is treated as inherent baseline cost and is not optimised away in test results.
+- Error rates above 1% at the stress stage are attributed to the 512 MB RAM ceiling rather than application logic errors.
+
 ## Documentation
 
 - docs/ADR-001 — Why in-memory storage
